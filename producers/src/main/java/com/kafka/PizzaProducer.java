@@ -93,6 +93,9 @@ public class PizzaProducer {
             });
         } else {
             try {
+                // 만약 acks=0에 sync로 메시지를 send하면 metadata는 가져옴.
+                // partition은 sendbroker안에서 메시지가 저장되지만,
+                // offset은 브로커로부터 저장이 됐을때 ack받는 건데 그렇게 하지 못하고 계속 syn보내니 -1 값이 출력됨.
                 RecordMetadata recordMetadata = producer.send(producerRecord).get();
                 logger.info("sync message = {} offset = {}, partition = {}", pMessage.get("key"), recordMetadata.offset(), recordMetadata.partition());
             } catch (InterruptedException e) { // thread
