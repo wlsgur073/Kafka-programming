@@ -27,6 +27,14 @@ public class PizzaProducer {
         props.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
+        // acks setting
+        // props.setProperty(ProducerConfig.ACKS_CONFIG, "all"); // 0, 1, all
+
+        // batch setting
+//        props.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "16384"); // default 16KB
+//        props.setProperty(ProducerConfig.LINGER_MS_CONFIG, "1"); // default 0
+//        props.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5"); // default 5
+
         // Create KafkaProducer object
         KafkaProducer<String, String> producer = new KafkaProducer<>(props); // create network thread by KafkaProducer
 
