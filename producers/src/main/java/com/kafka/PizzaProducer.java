@@ -32,14 +32,23 @@ public class PizzaProducer {
 
         // batch setting
 //        props.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, "16384"); // default 16KB
-//        props.setProperty(ProducerConfig.LINGER_MS_CONFIG, "1"); // default 0
-//        props.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5"); // default 5
+//        props.setProperty(ProducerConfig.LINGER_MS_CONFIG, "1"); // default 0 // 설정 값만큼 배치에 메시지가 차길 기다린 후 브로커로 전송
+//        props.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5"); // default 5, range 1-5 // 브로커 서버의 응답없이(without ack) Producer의 sender thread가 한번에 보낼 수 있는 메시지 배치의 개수
+
+        // delivery.timeout.ms: 설정 시간동안 ack가 오지 않으면 에러를 발생시킴.
+        // delivery.timeout.ms > linger.ms + request.timeout.ms 이어야 함.
+//        props.setProperty(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, "29000"); // ConfigException: delivery.timeout.ms should be equal to or larger than linger.ms + request.timeout.ms
+
+        // ENABLE_IDEMPOTENCE_CONFIG의 기본값은 true인데, 명시적으로 설정해주면 acks를 all로 설정해줘야 함. 그렇게 안하면 에러 발생.
+//        props.setProperty(ProducerConfig.ACKS_CONFIG, "0");
+//        props.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true"); // Must set acks to all in order to use the idempotent producer.
+
 
         // Create KafkaProducer object
         KafkaProducer<String, String> producer = new KafkaProducer<>(props); // create network thread by KafkaProducer
 
         sendPizzaMessage(topicName, producer,
-                -1, 10, 100, 100, true
+                -1, 1000, 0, 0, false
         );
 
         producer.close();
