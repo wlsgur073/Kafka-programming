@@ -21,7 +21,10 @@ public class SimpleConsumer {
         props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.56.101:9092"); // VM address
         props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "group_01"); // Java에서는 group.id를 명시해줘야 함.
+        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "simple-group");
+//        props.setProperty(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, "5000"); // default 3000
+//        props.setProperty(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "90000"); // default 45000
+//        props.setProperty(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "600000"); // default 300000
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(List.of(topicName)); // 브로커에 topic을 구독하도록 설정
@@ -33,5 +36,7 @@ public class SimpleConsumer {
                         logger.info("key: {}, value: {}", record.key(), record.value());
                     });
         }
+
+//        consumer.close();
     }
 }
