@@ -16,15 +16,14 @@ public class ConsumerWakeup {
 
     public static void main(String[] args) {
 
-        String topicName = "simple-topic";
+        String topicName = "pizza-topic";
 
         Properties props = new Properties();
         props.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.56.101:9092"); // VM address
         props.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "group_01"); // Java에서는 group.id를 명시해줘야 함.
-//        props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest"); // default: latest, `earliest` means from the beginning
-        props.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "group-01-static");
+        props.setProperty(ConsumerConfig.GROUP_INSTANCE_ID_CONFIG, "3"); // Consumer group instance id
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(List.of(topicName));
@@ -47,7 +46,7 @@ public class ConsumerWakeup {
             while (true) {
                 consumer.poll(Duration.ofMillis(1000))
                         .forEach(record -> {
-                            logger.info("key: {}, value: {}, offset: {}", record.key(), record.value(), record.offset());
+                            logger.info("key: {}, partition: {},  offset: {}, value: {}", record.key(), record.partition(), record.offset(), record.value());
                         });
             }
         } catch (WakeupException e) {
