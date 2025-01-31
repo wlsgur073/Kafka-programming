@@ -1,9 +1,7 @@
 package com.kafka;
 
-import org.apache.kafka.clients.consumer.CommitFailedException;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.*;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
@@ -11,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class ConsumerCommit {
@@ -45,10 +44,44 @@ public class ConsumerCommit {
         }));
 
 //        pollAutoCommit(consumer);
-        pollAutoCommitSync(consumer);
+//        pollCommitSync(consumer);
+        pollCommitAsync(consumer);
     }
 
-    private static void pollAutoCommitSync(KafkaConsumer<String, String> consumer) {
+    private static void pollCommitAsync(KafkaConsumer<String, String> consumer) {
+        int loopCount = 0;
+        try (consumer) {
+            while (true) {
+                ConsumerRecords<String, String> consumerRecords = consumer.poll(Duration.ofMillis(1000));
+                logger.info("###### loopCount: {}, consumerRecords count: {}", loopCount++, consumerRecords.count());
+                consumerRecords.forEach(record ->
+                        logger.info("key: {}, partition: {},  offset: {}, value: {}"
+                                , record.key(), record.partition(), record.offset(), record.value()
+                        )
+                );
+
+                // async commit
+                consumer.commitAsync(new OffsetCommitCallback() {
+                    @Override
+                    public void onComplete(Map<TopicPartition, OffsetAndMetadata> offsets, Exception e) {
+                        if (e != null) { // 실패 시 exception 객체 반환
+                            logger.error("CommitAsync failed. offsets: {}, error: {}", offsets, e.getMessage());
+                        } else {
+                            logger.info("CommitAsync success");
+                        }
+                    }
+                });
+            }
+        } catch (WakeupException e) {
+            logger.error("WakeupException occurred");
+        } finally {
+            // close 전에 sync로 commit 해주는 것도 안전하게 처리하는 하나의 방법이다.
+//            consumer.commitSync(); // sync commit
+            logger.info("Closing consumer");
+        }
+    }
+
+    private static void pollCommitSync(KafkaConsumer<String, String> consumer) {
         int loopCount = 0;
         try (consumer) {
             while (true) {
