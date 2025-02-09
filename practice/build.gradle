@@ -19,6 +19,11 @@ dependencies {
 
     implementation 'org.postgresql:postgresql:42.4.0'
 
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+
+    // Java 8 LocalDateTime 직렬화시 오류 발생시 추가
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
